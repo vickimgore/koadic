@@ -156,7 +156,8 @@ class Shell(object):
             if redraw or threading.current_thread().ident != self.main_thread_id:
                 #sys.stdout.write("\033[s")
                 buffer = readline.get_line_buffer()
-                sys.stdout.write("\033[1K\r" + self.clean_prompt + buffer)
+                #sys.stdout.write("\033[1K\r" + self.clean_prompt + buffer)
+                sys.stdout.write("\033[1K\r" + buffer)
                 #sys.stdout.write("\033[u\033[B")
 
             #sys.stdout.flush()

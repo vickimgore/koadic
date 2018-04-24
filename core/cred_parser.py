@@ -4,10 +4,17 @@ import traceback
 
 class CredParse(object):
 
-    def __init__(self, job):
-        self.job = job
-        self.shell = job.shell
-        self.session = job.session
+    '''
+        shell - the koadic superobject
+        printer - an object with standard shell-like print_status functions
+        ip - the ip the creds were scraped from
+        domain - the session computer
+    '''
+    def __init__(self, shell, printer, ip, domain):
+        self.shell = shell
+        self.printer = printer
+        self.ip = ip
+        self.domain = domain
 
     def new_cred(self):
         cred = {}
@@ -46,12 +53,12 @@ class CredParse(object):
                 continue
             for h in hsec:
                 c = self.new_cred()
-                c["IP"] = self.session.ip
+                c["IP"] = self.ip#self.session.ip
                 hparts = h.split(":")
                 c["Username"] = hparts[0]
                 if htype == "sam":
                     c["NTLM"] = hparts[3]
-                    c["Domain"] = self.session.computer
+                    c["Domain"] = self.domain# self.session.computer
                 else:
                     c["DCC"] = hparts[1]
                     c["Domain"] = hparts[3]
@@ -73,22 +80,28 @@ class CredParse(object):
 
         return
 
-    def parse_mimikatz(self, data):
-        data = data.split("mimikatz(powershell) # ")[1]
+    def parse_mimikatz(self, data, returnearly=True):
+        parsed_data = ""
+        data = data.replace("\r", "")
+        # data = data.split("mimikatz(")[1]
         if "token::elevate" in data and "Impersonated !" in data:
-            self.job.print_good("token::elevate -> got SYSTEM!")
-            return
+            self.printer.print_good("token::elevate -> got SYSTEM!")
+            if returnearly:
+                return
 
         if "privilege::debug" in data and "OK" in data:
-            self.job.print_good("privilege::debug -> got SeDebugPrivilege!")
-            return
+            self.printer.print_good("privilege::debug -> got SeDebugPrivilege!")
+            if returnearly:
+                return
 
         if "ERROR kuhl_m_" in data:
-            self.job.error("0", data.split("; ")[1].split(" (")[0], "Error", data)
-            self.job.errstat = 1
-            return
+            self.printer.error("0", data.split("; ")[1].split(" (")[0], "Error", data)
+            self.printer.errstat = 1
+            if returnearly:
+                return
 
         try:
+            # print("UHHH HELOOOOOOOOOOOOOOOOOOO")
             if "Authentication Id :" in data and ("sekurlsa::logonpasswords" in data.lower()
                     or "sekurlsa::msv" in data.lower()
                     or "sekurlsa::tspkg" in data.lower()
@@ -96,6 +109,7 @@ class CredParse(object):
                     or "sekurlsa::kerberos" in data.lower()
                     or "sekurlsa::ssp" in data.lower()
                     or "sekurlsa::credman" in data.lower()):
+                # print(data)
                 from tabulate import tabulate
                 nice_data = data.split('\n\n')
                 cred_headers = ["msv","tspkg","wdigest","kerberos","ssp","credman"]
@@ -105,6 +119,7 @@ class CredParse(object):
                 kerberos_all = []
                 ssp_all = []
                 credman_all = []
+                #print(nice_data)
                 for section in nice_data:
                     if 'Authentication Id' in section:
                         msv = collections.OrderedDict()
@@ -138,7 +153,7 @@ class CredParse(object):
                     del cred_list[:]
                     cred_list.extend(tmp)
 
-                parsed_data = "Results\n\n"
+                parsed_data += "Results\n\n"
 
                 for cred_header in cred_headers:
                     banner = cred_header+" credentials\n"+(len(cred_header)+12)*"="+"\n\n"
@@ -153,7 +168,7 @@ class CredParse(object):
                         if key not in self.shell.creds_keys:
                             self.shell.creds_keys.append(key)
                             c = self.new_cred()
-                            c["IP"] = self.session.ip
+                            c["IP"] = self.ip#self.session.ip
                             for subkey in cred:
                                 c[subkey] = cred[subkey]
                             if "\\" in c["Username"]:
@@ -199,15 +214,15 @@ class CredParse(object):
                     parsed_data += tabulate(cred_dict, headers="keys", tablefmt="plain")
                     parsed_data += "\n\n"
 
-                data = parsed_data
+                # data = parsed_data
 
             if "SAMKey :" in data and "lsadump::sam" in data.lower():
                 domain = data.split("Domain : ")[1].split("\n")[0]
-                parsed_data = data.split("\n\n")
-                for section in parsed_data:
+                sam_parsed_data = data.split("\n\n")
+                for section in sam_parsed_data:
                     if "RID  :" in section:
                         c = self.new_cred()
-                        c["IP"] = self.session.ip
+                        c["IP"] = self.ip#self.session.ip
                         c["Username"] = section.split("User : ")[1].split("\n")[0]
                         c["Domain"] = domain
                         lm = section.split("LM   : ")[1].split("\n")[0]
@@ -229,7 +244,7 @@ class CredParse(object):
                             elif self.shell.creds[key]["LM"] != lm and lm:
                                 self.shell.creds[key]["Extra"]["LM"].append(lm)
 
-            return data
+            return parsed_data
         except Exception as e:
             data += "\n\n\n"
             data += traceback.format_exc()

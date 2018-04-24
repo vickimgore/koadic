@@ -16,7 +16,7 @@ class DotNet2JSJob(core.job.Job):
         self.errstat = 0
 
     def parse_mimikatz(self, data):
-        cp = core.cred_parser.CredParse(self)
+        cp = core.cred_parser.CredParse(self.shell, self, self.session.ip, self.session.computer)
         self.mimi_output = cp.parse_mimikatz(data)
 
     def report(self, handler, data, sanitize = False):

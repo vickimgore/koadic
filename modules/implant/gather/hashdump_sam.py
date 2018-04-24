@@ -114,7 +114,7 @@ class HashDumpSAMJob(core.job.Job):
         output = p.stdout.read().decode()
         self.shell.print_plain(output)
 
-        cp = core.cred_parser.CredParse(self)
+        cp = core.cred_parser.CredParse(self.shell, self, self.session.ip, self.session.computer)
         cp.parse_hashdump_sam(output)
 
         super(HashDumpSAMJob, self).report(None, "", False)

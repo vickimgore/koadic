@@ -15,8 +15,8 @@ class Shell(object):
     def __init__(self, banner, version):
         self.banner = banner
         self.version = version
-        self.actions = core.loader.load_plugins("core/commands")
-        self.plugins = core.loader.load_plugins("modules", True, self)
+        self.actions, self.comm_errors = core.loader.load_plugins("core/commands")
+        self.plugins, self.load_errors = core.loader.load_plugins("modules", True, self)
         self.stagers = []
         self.state = "stager/js/mshta"
         self.colors = core.colors.Colors()
@@ -32,6 +32,9 @@ class Shell(object):
         self.main_thread_id = threading.current_thread().ident
 
         self.print_banner()
+
+        for load_error in self.load_errors:
+            self.print_warning("Unable to load %s" % load_error)
 
         while True:
             try:

@@ -5,6 +5,7 @@ import core.plugin
 
 def load_plugins(dir, instantiate = False, shell = None):
     plugins = {}
+    errors = []
 
     for root, dirs, files in os.walk(dir):
         sys.path.append(root)
@@ -17,31 +18,35 @@ def load_plugins(dir, instantiate = False, shell = None):
 
         #print root
         for file in files:
-            if not file.endswith(".py"):
-                continue
+            full_file = file
+            try:
+                if not file.endswith(".py"):
+                    continue
 
-            if file in ["__init__.py"]:
-                continue
+                if file in ["__init__.py"]:
+                    continue
 
-            file = file.rsplit(".py", 1)[0]
-            pname = module_root + "/" + file
-            if (pname.startswith("/")):
-                pname = pname[1:]
+                file = file.rsplit(".py", 1)[0]
+                pname = module_root + "/" + file
+                if (pname.startswith("/")):
+                    pname = pname[1:]
 
-            if instantiate:
-                if pname in sys.modules:
-                    del sys.modules[pname]
-                env = __import__(file, )
-                for name, obj in inspect.getmembers(env):
-                    if inspect.isclass(obj) and issubclass(obj, core.plugin.Plugin):
-                        plugins[pname] = obj(shell)
-                        break
-            else:
-                plugins[pname] = __import__(file)
+                if instantiate:
+                    if pname in sys.modules:
+                        del sys.modules[pname]
+                    env = __import__(file, )
+                    for name, obj in inspect.getmembers(env):
+                        if inspect.isclass(obj) and issubclass(obj, core.plugin.Plugin):
+                            plugins[pname] = obj(shell)
+                            break
+                else:
+                    plugins[pname] = __import__(file)
+            except Exception as e:
+                errors.append(root + '/' + full_file)
 
         sys.path.remove(root)
 
-    return plugins
+    return plugins, errors
 
 def load_script(path, options = None, minimize = True):
     with open(path, "rb") as f:

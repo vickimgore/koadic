@@ -2,6 +2,7 @@ import os
 import sys
 import traceback
 import threading
+import readline
 
 import core.loader
 import core.colors
@@ -25,6 +26,7 @@ class Shell(object):
         self.creds_keys = []
         self.domain_info = {}
         self.sounds = {}
+        self.print_mutex = threading.Lock()
 
     def run(self, autorun = []):
         self.main_thread_id = threading.current_thread().ident
@@ -144,15 +146,17 @@ class Shell(object):
         print(self.banner % (self.version, stager_len, implant_len))
 
     def print_plain(self, text, redraw = False):
-        sys.stdout.write("\033[1K\r" + text + os.linesep)
-        sys.stdout.flush()
 
-        if redraw or threading.current_thread().ident != self.main_thread_id:
-            import readline
-            #sys.stdout.write("\033[s")
-            sys.stdout.write(self.clean_prompt + readline.get_line_buffer())
-            #sys.stdout.write("\033[u\033[B")
-            sys.stdout.flush()
+        with self.print_mutex:
+            sys.stdout.write("\033[1K\r" + text + os.linesep)
+
+            if redraw or threading.current_thread().ident != self.main_thread_id:
+                #sys.stdout.write("\033[s")
+                buffer = readline.get_line_buffer()
+                sys.stdout.write("\033[1K\r" + self.clean_prompt + buffer)
+                #sys.stdout.write("\033[u\033[B")
+
+            #sys.stdout.flush()
 
     def print_text(self, sig, text, redraw = False):
         self.print_plain(sig + " " + text, redraw)

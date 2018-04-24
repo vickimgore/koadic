@@ -5,7 +5,7 @@ import time
 import random
 import uuid
 import argparse
-import StringIO
+import io
 from impacket import smb, smbconnection
 from impacket.dcerpc.v5 import transport
 
@@ -93,7 +93,7 @@ class SMBClient(smb.SMB):
 
     def download_file(self, share, fname):
         smbConn = self.get_smbconnection()
-        output = StringIO.StringIO()
+        output = io.StringIO()
         smbConn.getFile(share, fname, output.write)
         out = output.getvalue()
         output.close()

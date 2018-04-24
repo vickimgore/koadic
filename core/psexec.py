@@ -38,9 +38,9 @@ class PSExec(core.remote.Remote):
 
         self.smb_pwn(client, ip, port)
 
-    	client.disconnect_tree(client.get_tid())
-    	client.logoff()
-    	client.get_socket().close()
+        client.disconnect_tree(client.get_tid())
+        client.logoff()
+        client.get_socket().close()
 
 
     def smb_pwn(self, client, ip, port):

@@ -100,9 +100,11 @@ def get_ports(str):
 
 def get_ips(str):
     ips = []
-    for x in str.split(","):
-        ips += parse_cidr(x.strip())
-    return ips
+    for y in str.split("\n"):
+        for x in y.split(","):
+            for ip in parse_cidr(x.strip()):
+                yield ip
+    #return ips
 
 if __name__ == "__main__":
     ips = get_ips("127.0.0.1,192.168.0.0/24,10.0.0.40/28")

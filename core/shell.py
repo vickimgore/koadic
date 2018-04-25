@@ -50,7 +50,7 @@ class Shell(object):
                 if len(cmd) == 0:
                     cmd = self.get_command(self.prompt, self.autocomplete)
                 else:
-                    print_plain(cmd)
+                    print_plain(self.clean_prompt + cmd)
 
                 self.run_command(cmd)
 

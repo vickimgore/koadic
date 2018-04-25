@@ -50,7 +50,7 @@ class Shell(object):
                 if len(cmd) == 0:
                     cmd = self.get_command(self.prompt, self.autocomplete)
                 else:
-                    print(self.clean_prompt + cmd)
+                    print_plain(cmd)
 
                 self.run_command(cmd)
 
@@ -115,7 +115,7 @@ class Shell(object):
         else:
             raw_input = __builtins__['raw_input']
 
-        cmd = raw_input("%s" % prompt)
+        cmd = raw_input("\r%s" % prompt)
         return cmd.strip()
 
     def autocomplete(self, text, state):
@@ -156,8 +156,7 @@ class Shell(object):
             if redraw or threading.current_thread().ident != self.main_thread_id:
                 #sys.stdout.write("\033[s")
                 buffer = readline.get_line_buffer()
-                #sys.stdout.write("\033[1K\r" + self.clean_prompt + buffer)
-                sys.stdout.write("\033[1K\r" + buffer)
+                sys.stdout.write("\033[1K\r" + self.clean_prompt + buffer)
                 #sys.stdout.write("\033[u\033[B")
 
             #sys.stdout.flush()

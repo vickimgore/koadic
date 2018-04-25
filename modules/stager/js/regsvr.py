@@ -3,7 +3,7 @@ import core.stager
 class MSHTAStager(core.stager.Stager):
 
     NAME = "JScript RegSvr Stager"
-    DESCRIPTION = "Listens for new sessions, using COM+ RegSvr for payloads"
+    DESCRIPTION = "Listens for new sessions, using REGSVR32 for payloads (AKA squiblydoo)"
     AUTHORS = [ 'subTee', # discovery
                 'zerosum0x0' # stager
                 ]

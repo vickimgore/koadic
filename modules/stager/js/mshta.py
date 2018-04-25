@@ -3,7 +3,7 @@ import core.stager
 class MSHTAStager(core.stager.Stager):
 
     NAME = "JScript MSHTA Stager"
-    DESCRIPTION = "Listens for new sessions, using JScript MSHTA for payloads"
+    DESCRIPTION = "Listens for new sessions, using MSHTA for payloads"
     AUTHORS = ['zerosum0x0']
 
     WORKLOAD = "js"

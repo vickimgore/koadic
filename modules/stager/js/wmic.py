@@ -3,7 +3,7 @@ import core.stager
 class WMICStager(core.stager.Stager):
 
     NAME = "JScript WMIC Stager"
-    DESCRIPTION = "Listens for new sessions, using WMIC for payloads"
+    DESCRIPTION = "Listens for new sessions, using WMIC for payloads (AKA squiblytwo)"
     AUTHORS = [
             'subTee', # discovery
             'mattifestation', #discovery

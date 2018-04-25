@@ -3,7 +3,7 @@ import core.stager
 class RunDLL32JSStager(core.stager.Stager):
 
     NAME = "JScript rundll32.exe JavaScript Stager"
-    DESCRIPTION = "Listens for new sessions, using JavaScript for payloads"
+    DESCRIPTION = "Listens for new sessions, using RUNDLL32 for payloads"
     AUTHORS = ['zerosum0x0']
 
     WORKLOAD = "js"

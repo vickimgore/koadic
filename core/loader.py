@@ -43,6 +43,7 @@ def load_plugins(dir, instantiate = False, shell = None):
                     plugins[pname] = __import__(file)
             except Exception as e:
                 errors.append(root + '/' + full_file)
+                print(e)
 
         sys.path.remove(root)
 

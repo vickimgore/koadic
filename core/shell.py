@@ -142,11 +142,11 @@ class Shell(object):
     def print_banner(self):
         os.system("clear")
 
-        implant_len = len([a for a in self.plugins
-                           if a.startswith("implant")])
-        stager_len = len([a for a in self.plugins
-                          if a.startswith("stager")])
-        print(self.banner % (self.version, stager_len, implant_len))
+        implant_len = len([a for a in self.plugins if a.startswith("implant")])
+        stager_len = len([a for a in self.plugins if a.startswith("stager")])
+        remote_len = len([a for a in self.plugins if a.startswith("remote")])
+
+        print(self.banner % (self.version, stager_len, implant_len, remote_len))
 
     def print_plain(self, text, redraw = False):
 

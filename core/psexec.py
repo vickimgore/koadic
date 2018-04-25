@@ -17,17 +17,19 @@ class PSExec(core.remote.Remote):
         self.options.register("RPATH", "", "the file path to use on the share")
 
     def run_ip(self, ip, port):
-        timeout = float(self.options.get("TIMEOUT"))
+        tout = float(self.options.get("TIMEOUT"))
         user = self.options.get("SMBUSER")
         domain = self.options.get("SMBDOMAIN")
         password = self.options.get("SMBPASS")
 
-        client = core.smbclient.SMBClient(self, ip, timeout=timeout)
+        self.print_status("Connecting to target")
+        client = core.smbclient.SMBClient(self, ip, timeout=tout)
 
         # figure out if this is an NTLM hash
         nthash = password.split(":")[1] if ":" in password else password
         nthash = nthash.strip().lower()
 
+        self.print_status("Logging in.")
         if len(nthash) == 32 and all(c in string.hexdigits for c in nthash):
             client.login(user, password, domain=domain, nthash=password)
         else:

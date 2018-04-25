@@ -25,7 +25,26 @@ class SMBClient(smb.SMB):
         rpctransport = transport.SMBTransport(self.get_remote_host(), self.get_remote_host(), filename='\\'+named_pipe, smb_connection=smbConn)
         return rpctransport.get_dce_rpc()
 
+    def run_command(self, cmd, share="C$", path="\\Windows\\temp\\"):
+        text = path + uuid.uuid4().hex + ".txt"
+        bat = path + uuid.uuid4().hex + ".bat"
+
+        execute = "%COMSPEC% /C echo " + cmd + " ^> %SYSTEMDRIVE%" + text + " > " + bat + " & %COMSPEC% /C start %COMSPEC% /C " + bat
+        self.service_exec(execute)
+
+        ret = self.download_file(share, text)
+
+        try:
+            self.delete_file(share, bat)
+            self.delete_file(share, text)
+        except:
+            self.printer.print_error("Exception during cleanup, files may be left behind on system...")
+
+        return ret
+
     def service_exec(self, cmd):
+        #self.printer.print_status(cmd)
+
         import random
         import string
         from impacket.dcerpc.v5 import transport, srvs, scmr
@@ -72,9 +91,14 @@ class SMBClient(smb.SMB):
                     #print('Stoping service %s.....' % service_name)
                     #scmr.hRControlService(rpcsvc, serviceHandle, scmr.SERVICE_CONTROL_STOP)
                 except Exception as e:
-                    self.printer.print_warning(str(e))
+                    if e.error_code == 0x41d:#ERROR_SERVICE_REQUEST_TIMEOUT
+                        self.printer.print_good("Service start timed out, OK if running a command or non-service executable...")
+                    elif e.error_code == 0x5:
+                        self.printer.print_error("Service failed to start - ACCESS_DENIED")
+                    else:
+                        self.printer.print_error(str(e))
 
-                print('Removing service %s.....' % service_name)
+                self.printer.print_status('Removing service %s.....' % service_name)
                 scmr.hRDeleteService(rpcsvc, serviceHandle)
                 scmr.hRCloseServiceHandle(rpcsvc, serviceHandle)
         except Exception as e:
@@ -93,7 +117,7 @@ class SMBClient(smb.SMB):
 
     def download_file(self, share, fname):
         smbConn = self.get_smbconnection()
-        output = io.StringIO()
+        output = io.BytesIO()
         smbConn.getFile(share, fname, output.write)
         out = output.getvalue()
         output.close()

@@ -307,5 +307,16 @@ class Handler(BaseHTTPRequestHandler):
         script = script.replace(b".in", b"m222")
         '''
 
+        import core.loader
+
+        if True:#if minimize:
+            test = script
+            name =  core.loader.random_arr_name()
+            chunks = core.loader.split_into_chunks(test)
+            chunk_tuple = core.loader.shuffle_chunks(chunks, name)
+            script = chunk_tuple[2] + core.loader.rearrange_chunks(chunk_tuple[0], chunk_tuple[1], name)
+
         script = template.replace(b"~SCRIPT~", script)
+
+
         return script

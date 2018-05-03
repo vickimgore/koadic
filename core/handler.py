@@ -311,10 +311,13 @@ class Handler(BaseHTTPRequestHandler):
 
         if True:#if minimize:
             test = script
-            name =  core.loader.random_arr_name()
-            chunks = core.loader.split_into_chunks(test)
-            chunk_tuple = core.loader.shuffle_chunks(chunks, name)
-            script = chunk_tuple[2] + core.loader.rearrange_chunks(chunk_tuple[0], chunk_tuple[1], name)
+            xor_key = core.loader.create_xor_key()
+            xor_script = core.loader.xor(test, xor_key, True)
+            script = core.loader.js_file(xor_script, xor_key)
+            # name =  core.loader.random_arr_name()
+            # chunks = core.loader.split_into_chunks(test)
+            # chunk_tuple = core.loader.shuffle_chunks(chunks, name)
+            # script = chunk_tuple[2] + core.loader.rearrange_chunks(chunk_tuple[0], chunk_tuple[1], name)
 
         script = template.replace(b"~SCRIPT~", script)
 

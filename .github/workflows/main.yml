@@ -1,0 +1,30 @@
+name: Build and push image
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: docker login
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
+      - name: update submodule
+        run: |
+          git submodule init
+          git submodule update
+      - name: Docker build
+        run: |
+          docker build -t koadic:latest .
+      - name: Docker tag
+        run: |
+          docker tag spiderfoot:latest vickimgore/koadic:latest
+      - name: Docker push
+        run: |
+          docker push vickimgore/koadic:latest

@@ -24,7 +24,7 @@ jobs:
           docker build -t koadic:latest .
       - name: Docker tag
         run: |
-          docker tag spiderfoot:latest vickimgore/koadic:latest
+          docker tag koadic:latest vickimgore/koadic:latest
       - name: Docker push
         run: |
           docker push vickimgore/koadic:latest
